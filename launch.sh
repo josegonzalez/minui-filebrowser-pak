@@ -23,7 +23,10 @@ service_on() {
         "$progdir/bin/filebrowser" config set --auth.method=noauth -d "$progdir/filebrowser.db"
     fi
 
-    ("$progdir/bin/filebrowser" -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d "$progdir/filebrowser.db" -l "$progdir/log/service.log" &) &
+    # trimui password hash
+    trimui_password_hash='$2y$10$RFnHktgHmBR3keGIof.AbeStAoeksLxqFs4fSQqrkANLvIANCEioW'
+
+    ("$progdir/bin/filebrowser" -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d "$progdir/filebrowser.db" -l "$progdir/log/service.log" --username trimui --password "$trimui_password_hash" &) &
 }
 
 service_off() {

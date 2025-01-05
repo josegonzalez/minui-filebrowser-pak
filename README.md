@@ -26,7 +26,7 @@ make build
 > [!NOTE]
 > The default credentials are:
 >
-> - `admin:admin`
+> - `trimui:trimui`
 
 ### anonymous-access
 
