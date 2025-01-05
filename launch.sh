@@ -17,6 +17,12 @@ service_on() {
 
     chmod +x "$progdir/bin/filebrowser"
     touch "$progdir/filebrowser.db"
+    if [ -f "$progdir/anonymous-access" ]; then
+        "$progdir/bin/filebrowser" config set --auth.method=json -d "$progdir/filebrowser.db"
+    else
+        "$progdir/bin/filebrowser" config set --auth.method=noauth -d "$progdir/filebrowser.db"
+    fi
+
     ("$progdir/bin/filebrowser" -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d "$progdir/filebrowser.db" -l "$progdir/log/service.log" &) &
 }
 

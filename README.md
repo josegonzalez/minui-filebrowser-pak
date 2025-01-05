@@ -23,6 +23,15 @@ make build
 
 ## Usage
 
+> [!NOTE]
+> The default credentials are:
+>
+> - `admin:admin`
+
+### anonymous-access
+
+By default, `filebrowser` requires a username and password for access control. To enable anonymous access, create a file named `anonymous-access`.
+
 ### daemon-mode
 
 By default, `filebrowser` runs as a foreground process, terminating on app exit. To run `filebrowser` in daemon mode, create a file named `daemon-mode` in the pak folder. This will turn the app into a toggle for `filebrowser`.
