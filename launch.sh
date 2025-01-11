@@ -9,6 +9,7 @@ RES_PATH="$progdir/res"
 BUTTON_LOG="$progdir/log/buttons.log"
 
 SERVICE_NAME="filebrowser"
+SUPPORTS_DAEMON_MODE=1
 service_on() {
     cd /mnt/SDCARD/ || exit
     if [ -f "$progdir/log/service.log" ]; then
@@ -167,6 +168,11 @@ main_process() {
 }
 
 main() {
+    if [ "$SUPPORTS_DAEMON_MODE" -eq 0 ]; then
+        service_on
+        return $?
+    fi
+
     if [ -f "$progdir/daemon-mode" ]; then
         main_daemonize
     else
