@@ -5,10 +5,10 @@ cd "$progdir" || exit 1
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$progdir/lib"
 echo 1 >/tmp/stay_awake
 trap "rm -f /tmp/stay_awake" EXIT INT TERM HUP QUIT
-RES_PATH="$progdir/res"
 BUTTON_LOG="$progdir/log/buttons.log"
 
 SERVICE_NAME="filebrowser"
+HUMAN_READABLE_NAME="HTTP Filebrowser Server"
 SUPPORTS_DAEMON_MODE=1
 service_on() {
     cd /mnt/SDCARD/ || exit
@@ -32,6 +32,36 @@ service_on() {
 
 service_off() {
     killall "$SERVICE_NAME"
+}
+
+show_message() {
+    message="$1"
+    seconds="$2"
+
+    if [ -z "$seconds" ]; then
+        seconds="forever"
+    fi
+
+    killall sdl2imgshow
+    echo "$message"
+    if [ "$seconds" = "forever" ]; then
+        "$progdir/bin/sdl2imgshow" \
+            -i "$progdir/res/background.png" \
+            -f "$progdir/res/fonts/BPreplayBold.otf" \
+            -s 27 \
+            -c "220,220,220" \
+            -q \
+            -t "$message" &
+    else
+        "$progdir/bin/sdl2imgshow" \
+            -i "$progdir/res/background.png" \
+            -f "$progdir/res/fonts/BPreplayBold.otf" \
+            -s 27 \
+            -c "220,220,220" \
+            -q \
+            -t "$message"
+        sleep "$seconds"
+    fi
 }
 
 monitor_buttons() {
@@ -110,61 +140,50 @@ wait_for_service() {
 main_daemonize() {
     echo "Toggling $SERVICE_NAME..."
     if pgrep "$SERVICE_NAME"; then
-        show.elf "$RES_PATH/disabling.png" 2
-        echo "Stopping $SERVICE_NAME..."
+        show_message "Disabling the $HUMAN_READABLE_NAME" 2
         service_off
     else
-        show.elf "$RES_PATH/enabling.png" 2
-        echo "Starting $SERVICE_NAME..."
+        show_message "Enabling the $HUMAN_READABLE_NAME" 2
         service_on
 
         if ! wait_for_service 10; then
-            show.elf "$RES_PATH/failed.png" 2
-            echo "Failed to start $SERVICE_NAME!"
+            show_message "Failed to start $HUMAN_READABLE_NAME" 2
             return 1
         fi
     fi
 
-    echo "Done toggling $SERVICE_NAME!"
-    show.elf "$RES_PATH/done.png" 2
+    show_message "Done" 1
 }
 
 main_process() {
     if pgrep "$SERVICE_NAME"; then
-        show.elf "$RES_PATH/disabling.png" 2
-        echo "Stopping $SERVICE_NAME..."
+        show_message "Disabling the $HUMAN_READABLE_NAME" 2
         service_off
     fi
 
-    show.elf "$RES_PATH/starting.png" &
-    echo "Starting $SERVICE_NAME"
+    show_message "Starting $HUMAN_READABLE_NAME" 2
     service_on
     sleep 1
 
-    echo "Waiting for $SERVICE_NAME to be running..."
+    echo "Waiting for $HUMAN_READABLE_NAME to be running"
     if ! wait_for_service 10; then
-        show.elf "$RES_PATH/failed.png" 2
-        echo "Failed to start $SERVICE_NAME!"
+        show_message "Failed to start $HUMAN_READABLE_NAME" 2
         return 1
     fi
 
-    echo "Waiting for button press to exit..."
     if [ -f "$progdir/log/buttons.log" ]; then
         mv "$progdir/log/buttons.log" "$progdir/log/buttons.log.old"
     fi
-    show.elf "$RES_PATH/press-b-to-exit.png" &
-    >"$BUTTON_LOG"
+    show_message "Press B to exit"
     monitor_buttons
 
     wait_for_button "BUTTON_B"
-    echo "Stopping $SERVICE_NAME..."
-    show.elf "$RES_PATH/stopping.png" &
+    show_message "Stopping $HUMAN_READABLE_NAME"
     service_off
     killall evtest
     sync
     sleep 1
-    show.elf "$RES_PATH/done.png" 1
-    killall show.elf
+    show_message "Done" 1
 }
 
 main() {
@@ -178,6 +197,7 @@ main() {
     else
         main_process
     fi
+    killall sdl2imgshow
 }
 
 mkdir -p "$progdir/log"
