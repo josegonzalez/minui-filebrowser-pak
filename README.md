@@ -9,7 +9,7 @@ A TrimUI Brick app wrapping [`filebrowser`](https://github.com/filebrowser/fileb
 ## Building
 
 ```shell
-make build
+make release
 ```
 
 ## Installation
