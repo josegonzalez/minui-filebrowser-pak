@@ -65,6 +65,11 @@ show_message() {
 }
 
 monitor_buttons() {
+    if [ -f "$BUTTON_LOG" ]; then
+        mv "$BUTTON_LOG" "$BUTTON_LOG.old"
+    fi
+    touch "$BUTTON_LOG"
+
     chmod +x "$progdir/bin/evtest"
     for dev in /dev/input/event*; do
         [ -e "$dev" ] || continue
@@ -171,9 +176,6 @@ main_process() {
         return 1
     fi
 
-    if [ -f "$progdir/log/buttons.log" ]; then
-        mv "$progdir/log/buttons.log" "$progdir/log/buttons.log.old"
-    fi
     show_message "Press B to exit"
     monitor_buttons
 
