@@ -2,15 +2,29 @@ TAG ?= v2.31.2
 BUILD_DATE := "$(shell date -u +%FT%TZ)"
 PAK_NAME := $(shell jq -r .label config.json)
 
+PLATFORMS := tg5040 rg35xxplus
+MINUI_LIST_VERSION := 0.3.1
+MINUI_KEYBOARD_VERSION := 0.2.1
+
 clean:
 	rm -f bin/filebrowser || true
+	rm -f bin/minui-keyboard-* || true
+	rm -f bin/minui-list-* || true
 	rm -f bin/sdl2imgshow || true
 	rm -f res/fonts/BPreplayBold.otf || true
 
-build: bin/filebrowser bin/sdl2imgshow res/fonts/BPreplayBold.otf
+build: $(foreach platform,$(PLATFORMS),bin/minui-keyboard-$(platform) bin/minui-list-$(platform)) bin/filebrowser bin/sdl2imgshow res/fonts/BPreplayBold.otf
 
 bin/filebrowser:
 	curl -sL https://github.com/filebrowser/filebrowser/releases/download/$(TAG)/linux-arm64-filebrowser.tar.gz | tar -xz -C bin
+
+bin/minui-keyboard-%:
+	curl -f -o bin/minui-keyboard-$* -sSL https://github.com/josegonzalez/minui-keyboard/releases/download/$(MINUI_KEYBOARD_VERSION)/minui-keyboard-$*
+	chmod +x bin/minui-keyboard-$*
+
+bin/minui-list-%:
+	curl -f -o bin/minui-list-$* -sSL https://github.com/josegonzalez/minui-list/releases/download/$(MINUI_LIST_VERSION)/minui-list-$*
+	chmod +x bin/minui-list-$*
 
 bin/sdl2imgshow:
 	docker buildx build --platform linux/arm64 --load -f Dockerfile.sdl2imgshow --progress plain -t app/sdl2imgshow:$(TAG) .
