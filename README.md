@@ -33,6 +33,12 @@ The default credentials are:
 
 - `trimui:trimui`
 
-### anonymous-access
+### Debug Logging
+
+To enable debug logging, create a file named `debug` in the pak folder. Logs will be written to the `$SDCARD_PATH/.userdata/$PLATFORM/logs/` folder.
+
+### Configuration
+
+#### anonymous-access
 
 By default, `filebrowser` requires a username and password for access control. To enable anonymous access, create a file named `anonymous-access`.
