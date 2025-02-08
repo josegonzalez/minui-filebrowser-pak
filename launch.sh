@@ -180,7 +180,7 @@ main_screen() {
     fi
 
     killall sdl2imgshow >/dev/null 2>&1 || true
-    "$progdir/bin/minui-list-$PLATFORM" --file "$minui_list_file" --format text --header "$HUMAN_READABLE_NAME Configuration"
+    "$progdir/bin/minui-list-$PLATFORM" --file "$minui_list_file" --format text --header "$HUMAN_READABLE_NAME"
 }
 
 main() {
