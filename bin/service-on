@@ -1,0 +1,28 @@
+#!/bin/sh
+bindir="$(dirname "$0")"
+progdir="$(dirname "$bindir")"
+cd "$progdir" || exit 1
+PAK_NAME="$(basename "$progdir")"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$progdir/lib"
+
+main() {
+    cd "$SDCARD_PATH" || exit 1
+    if [ -f "$LOGS_PATH/$PAK_NAME.service.log" ]; then
+        mv "$LOGS_PATH/$PAK_NAME.service.log" "$LOGS_PATH/$PAK_NAME.service.log.old"
+    fi
+
+    chmod +x "$progdir/bin/filebrowser"
+    touch "$progdir/filebrowser.db"
+    if [ -f "$progdir/anonymous-access" ]; then
+        "$bindir/filebrowser" config set --auth.method=json -d "$progdir/filebrowser.db"
+    else
+        "$bindir/filebrowser" config set --auth.method=noauth -d "$progdir/filebrowser.db"
+    fi
+
+    # trimui password hash
+    trimui_password_hash='$2y$10$RFnHktgHmBR3keGIof.AbeStAoeksLxqFs4fSQqrkANLvIANCEioW'
+
+    "$bindir/filebrowser" -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d "$progdir/filebrowser.db" -l "$LOGS_PATH/$PAK_NAME.service.log" --username trimui --password "$trimui_password_hash" &
+}
+
+main "$@"
