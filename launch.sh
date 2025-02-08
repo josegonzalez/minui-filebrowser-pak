@@ -11,6 +11,7 @@ SERVICE_NAME="filebrowser"
 HUMAN_READABLE_NAME="HTTP Filebrowser Server"
 LAUNCHES_SCRIPT="false"
 NETWORK_PORT=80
+NETWORK_SCHEME="http"
 
 service_off() {
     killall "$SERVICE_NAME"
@@ -145,7 +146,7 @@ get_ip_address() {
         return
     fi
 
-    echo "http://$ip_address:$NETWORK_PORT"
+    echo "$NETWORK_SCHEME://$ip_address:$NETWORK_PORT"
 }
 
 main_screen() {
