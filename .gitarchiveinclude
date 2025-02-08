@@ -1,6 +1,4 @@
 bin/filebrowser
-bin/minui-keyboard-tg5040
-bin/minui-keyboard-rg35xxplus
 bin/minui-list-tg5040
 bin/minui-list-rg35xxplus
 bin/sdl2imgshow
