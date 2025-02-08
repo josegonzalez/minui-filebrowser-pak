@@ -10,6 +10,7 @@ echo 1 >/tmp/stay_awake
 SERVICE_NAME="filebrowser"
 HUMAN_READABLE_NAME="HTTP Filebrowser Server"
 LAUNCHES_SCRIPT="false"
+NETWORK_PORT=80
 
 service_off() {
     killall "$SERVICE_NAME"
@@ -113,6 +114,40 @@ wait_for_service_to_stop() {
     done
 }
 
+get_ip_address() {
+    if [ -z "$NETWORK_PORT" ]; then
+        return
+    fi
+
+    enabled="$(cat /sys/class/net/wlan0/operstate)"
+    if [ "$enabled" != "up" ]; then
+        echo "Not connected to WiFi"
+        return
+    fi
+    ip_address=""
+
+    count=0
+    while true; do
+        count=$((count + 1))
+        if [ "$count" -gt 5 ]; then
+            break
+        fi
+
+        ip_address="$(ip addr show wlan0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)"
+        if [ -n "$ip_address" ]; then
+            break
+        fi
+        sleep 1
+    done
+
+    if [ -z "$ip_address" ]; then
+        echo "Not connected to WiFi"
+        return
+    fi
+
+    echo "http://$ip_address:$NETWORK_PORT"
+}
+
 main_screen() {
     minui_list_file="/tmp/minui-list"
     rm -f "$minui_list_file"
@@ -129,8 +164,12 @@ main_screen() {
 
     if is_service_running; then
         service_pid="$(pgrep "$SERVICE_NAME" 2>/dev/null | sort | head -n 1 || true)"
+        ip_address="$(get_ip_address)"
         echo "Enabled: true (pid: $service_pid)" >"$minui_list_file"
         echo "Start on boot: $start_on_boot" >>"$minui_list_file"
+        if [ -n "$ip_address" ]; then
+            echo "Address: $ip_address" >>"$minui_list_file"
+        fi
         echo "Disable" >>"$minui_list_file"
     fi
 
