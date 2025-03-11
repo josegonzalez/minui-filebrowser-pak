@@ -3,7 +3,7 @@ BUILD_DATE := "$(shell date -u +%FT%TZ)"
 PAK_NAME := $(shell jq -r .label config.json)
 
 PLATFORMS := tg5040 rg35xxplus
-MINUI_LIST_VERSION := 0.4.0
+MINUI_LIST_VERSION := 0.6.0
 
 clean:
 	rm -f bin/filebrowser || true
