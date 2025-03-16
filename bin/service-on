@@ -5,10 +5,6 @@ PAK_NAME="$(basename "$PAK_DIR")"
 PAK_NAME="${PAK_NAME%.*}"
 [ -f "$USERDATA_PATH/$PAK_NAME/debug" ] && set -x
 
-rm -f "$LOGS_PATH/$PAK_NAME.service.txt"
-exec >>"$LOGS_PATH/$PAK_NAME.service.txt"
-exec 2>&1
-
 echo "$0" "$@"
 cd "$PAK_DIR" || exit 1
 
