@@ -35,10 +35,10 @@ The default credentials are:
 
 ### Debug Logging
 
-To enable debug logging, create a file named `debug` in the `$SDCARD_PATH/.userdata/$PLATFORM/HTTPFilebrowser` folder. Logs will be written to the `$SDCARD_PATH/.userdata/$PLATFORM/logs/` folder.
+To enable debug logging, create a file named `debug` in the `$SDCARD_PATH/.userdata/$PLATFORM/HTTP Filebrowser` folder. Logs will be written to the `$SDCARD_PATH/.userdata/$PLATFORM/logs/` folder.
 
 ### Configuration
 
 #### anonymous-access
 
-By default, `filebrowser` requires a username and password for access control. To enable anonymous access, create a file named `anonymous-access`.
+By default, `filebrowser` requires a username and password for access control. To enable anonymous access, create a file named `anonymous-access` in the `$SDCARD_PATH/.userdata/$PLATFORM/HTTP Filebrowser` folder.

@@ -1,26 +1,37 @@
 #!/bin/sh
-bindir="$(dirname "$0")"
-progdir="$(dirname "$bindir")"
-cd "$progdir" || exit 1
-[ -f "$USERDATA_PATH/HTTPFilebrowser/debug" ] && set -x
-PAK_NAME="$(basename "$progdir")"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$progdir/lib"
+BIN_DIR="$(dirname "$0")"
+PAK_DIR="$(dirname "$BIN_DIR")"
+PAK_NAME="$(basename "$PAK_DIR")"
+PAK_NAME="${PAK_NAME%.*}"
+[ -f "$USERDATA_PATH/$PAK_NAME/debug" ] && set -x
+
+rm -f "$LOGS_PATH/$PAK_NAME.service.txt"
+exec >>"$LOGS_PATH/$PAK_NAME.service.txt"
+exec 2>&1
+
+echo "$0" "$@"
+cd "$PAK_DIR" || exit 1
+
+architecture=arm
+if uname -m | grep -q '64'; then
+    architecture=arm64
+fi
+
+export PATH="$PAK_DIR/bin/$architecture:$PAK_DIR/bin/$PLATFORM:$PAK_DIR/bin:$PATH"
 
 main() {
-    cd "$SDCARD_PATH" || return 1
-
-    chmod +x "$progdir/bin/filebrowser"
-    touch "$progdir/filebrowser.db"
-    if [ -f "$progdir/anonymous-access" ]; then
-        "$bindir/filebrowser" config set --auth.method=json -d "$progdir/filebrowser.db"
+    touch "$USERDATA_PATH/$PAK_NAME/filebrowser.db"
+    if [ -f "$USERDATA_PATH/$PAK_NAME/anonymous-access" ]; then
+        filebrowser config set --auth.method=json -d "$USERDATA_PATH/$PAK_NAME/filebrowser.db"
     else
-        "$bindir/filebrowser" config set --auth.method=noauth -d "$progdir/filebrowser.db"
+        filebrowser config set --auth.method=noauth -d "$USERDATA_PATH/$PAK_NAME/filebrowser.db"
     fi
 
     # trimui password hash
     trimui_password_hash='$2y$10$RFnHktgHmBR3keGIof.AbeStAoeksLxqFs4fSQqrkANLvIANCEioW'
 
-    "$bindir/filebrowser" -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d "$progdir/filebrowser.db" -l "$LOGS_PATH/$PAK_NAME.service.txt" --username trimui --password "$trimui_password_hash" &
+    chmod +x "$PAK_DIR/bin/$architecture/filebrowser"
+    filebrowser -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d "$USERDATA_PATH/$PAK_NAME/filebrowser.db" -l "$LOGS_PATH/$PAK_NAME.service.txt" --username trimui --password "$trimui_password_hash" &
 }
 
 main "$@"
