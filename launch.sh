@@ -112,6 +112,14 @@ wait_for_service_to_stop() {
     done
 }
 
+get_service_pid() {
+    if [ "$LAUNCHES_SCRIPT" = "true" ]; then
+        pgrep -fn "$SERVICE_NAME" 2>/dev/null | sort | head -n 1 || true
+    else
+        pgrep "$SERVICE_NAME" 2>/dev/null | sort | head -n 1 || true
+    fi
+}
+
 get_ip_address() {
     if [ -z "$NETWORK_PORT" ]; then
         return
@@ -172,7 +180,7 @@ main_screen() {
     echo "$settings" >"$minui_list_file"
 
     if is_service_running; then
-        service_pid="$(pgrep "$SERVICE_NAME" 2>/dev/null | sort | head -n 1 || true)"
+        service_pid="$(get_service_pid)"
         jq --arg pid "$service_pid" '.settings[.settings | length] |= . + {"name": "PID", "options": [$pid], "selected": 0, "features": {"unselectable": true}}' "$minui_list_file" >"$minui_list_file.tmp"
         mv "$minui_list_file.tmp" "$minui_list_file"
 
