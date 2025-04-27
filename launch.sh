@@ -26,10 +26,6 @@ LAUNCHES_SCRIPT="false"
 NETWORK_PORT=80
 NETWORK_SCHEME="http"
 
-service_off() {
-    killall "$SERVICE_NAME"
-}
-
 show_message() {
     message="$1"
     seconds="$2"
@@ -72,25 +68,11 @@ will_start_on_boot() {
     return 1
 }
 
-is_service_running() {
-    if pgrep "$SERVICE_NAME" >/dev/null 2>&1; then
-        return 0
-    fi
-
-    if [ "$LAUNCHES_SCRIPT" = "true" ]; then
-        if pgrep -fn "$SERVICE_NAME" >/dev/null 2>&1; then
-            return 0
-        fi
-    fi
-
-    return 1
-}
-
 wait_for_service() {
     max_counter="$1"
     counter=0
 
-    while ! is_service_running; do
+    while ! service-is-running; do
         counter=$((counter + 1))
         if [ "$counter" -gt "$max_counter" ]; then
             return 1
@@ -103,7 +85,7 @@ wait_for_service_to_stop() {
     max_counter="$1"
     counter=0
 
-    while is_service_running; do
+    while service-is-running; do
         counter=$((counter + 1))
         if [ "$counter" -gt "$max_counter" ]; then
             return 1
@@ -159,7 +141,7 @@ current_settings() {
     rm -f "$minui_list_file"
 
     jq -rM '{settings: .settings}' "$PAK_DIR/settings.json" >"$minui_list_file"
-    if is_service_running; then
+    if service-is-running; then
         jq '.settings[0].selected = 1' "$minui_list_file" >"$minui_list_file.tmp"
         mv "$minui_list_file.tmp" "$minui_list_file"
     fi
@@ -179,7 +161,7 @@ main_screen() {
 
     echo "$settings" >"$minui_list_file"
 
-    if is_service_running; then
+    if service-is-running; then
         service_pid="$(get_service_pid)"
         jq --arg pid "$service_pid" '.settings[.settings | length] |= . + {"name": "PID", "options": [$pid], "selected": 0, "features": {"unselectable": true}}' "$minui_list_file" >"$minui_list_file.tmp"
         mv "$minui_list_file.tmp" "$minui_list_file"
@@ -276,7 +258,7 @@ main() {
                 killall minui-presenter >/dev/null 2>&1 || true
             else
                 show_message "Disabling $HUMAN_READABLE_NAME" 2
-                if ! service_off; then
+                if ! service-off; then
                     show_message "Failed to disable $HUMAN_READABLE_NAME!" 2
                 fi
 
